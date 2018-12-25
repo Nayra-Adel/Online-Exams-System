@@ -1,0 +1,54 @@
+<html>  
+	<head>
+		<title>Registration Page </title>
+                 <script>
+                    function sendAjax(){
+                        var username = document.getElementById("username").value;
+                        var xmlhttp = new XMLHttpRequest();
+
+                        xmlhttp.open("GET", "registrationAjaxProcessing?username=" + username, true);
+                        xmlhttp.send();
+
+                        xmlhttp.onreadystatechange = function(){
+                            if(xmlhttp.readyState == 4 && xmlhttp.status == 200){
+                                document.getElementById("usernameCheckDiv").innerHTML = xmlhttp.responseText;
+                            }
+                        }
+                    }
+                </script>
+		<meta charset="UTF-8">
+	</head>
+	<body>  
+		<form name = "register-form" action="registration" method="POST" onsubmit="return validateForm()" enctype="multipart/form-data">  
+                    Username: <input type="text" name="username" id="username"  onkeyup="sendAjax()" ><br>
+                    Phone: <input type="number" name="phone"><br>
+                    Email: <input type="email" name="email"><br>
+                    Password: <input type="password" name="password"><br>
+                    Link to CV: <input type="text" name="cv"/><br>
+                    CV pdf file: <input type="file" name="cvFile"/><br>
+                    <input type="submit" value="submit">
+		</form>
+                <div id="usernameCheckDiv">
+                       
+                </div>
+		<script>
+			function validateForm() {
+			  var name = document.forms["register-form"]["name"].value;
+			  var email = document.forms["register-form"]["email"].value;
+			  var password = document.forms["register-form"]["password"].value;
+			  if (name == "") {
+			    alert("Name must be filled out");
+			    return false;
+			  }
+			  if (email == "") {
+			    alert("Email must be filled out");
+			    return false;
+			  }
+			  if (password == "") {
+			    alert("Password must be filled out");
+			    return false;
+			  }
+			}
+		</script>
+	</body>  	
+</html>  
