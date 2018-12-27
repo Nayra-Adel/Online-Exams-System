@@ -9,8 +9,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,45 +46,43 @@ public class createExam extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
-        
+
         String examType = request.getParameter("examType");
         questionDB questionDB = new questionDB();
         ResultSet rs = questionDB.getQuestionsByExamType(examType);
-        
+
         ArrayList<Question> allQuestions = new ArrayList<Question>();
         ArrayList<Question> examQuestions = new ArrayList<Question>();
         int q_id = 0;
         String sentence = "";
         String topic = "";
-        
-        while(rs.next()){
+
+        while (rs.next()) {
             q_id = rs.getInt("question_id");
             sentence = rs.getString("sentence");
             topic = rs.getString("topic");
             allQuestions.add(new Question(q_id, sentence, topic));
         }
         questionDB.closeConnection();
-        
+
         Random rand = new Random();
         int randomQuestion = 0;
         int examSize = 5;
         ArrayList<String> answers = new ArrayList<>();
         Question q = new Question();
-        
-        for(int i=0; i<examSize; i++)
-        {
+
+        for (int i = 0; i < examSize; i++) {
             randomQuestion = rand.nextInt(allQuestions.size());
             q = allQuestions.get(randomQuestion);
             SetAnswers(q);
-            System.out.println(randomQuestion + " i->" + i + " " + allQuestions.get(randomQuestion).sentence +" ---------correct answer is -----"+ allQuestions.get(randomQuestion).correctAnswer);
+            System.out.println(randomQuestion + " i->" + i + " " + allQuestions.get(randomQuestion).sentence + " ---------correct answer is -----" + allQuestions.get(randomQuestion).correctAnswer);
             allQuestions.remove(q);
             examQuestions.add(q);
         }
-        
-        for(Question qq : examQuestions)
-        {
+
+        for (Question qq : examQuestions) {
             Collections.shuffle(qq.answers);
-            System.out.println(qq.sentence+ " **** "+qq.correctAnswer);
+            System.out.println(qq.sentence + " **** " + qq.correctAnswer);
         }
 //        try (PrintWriter out = response.getWriter()) {
 //            /* TODO output your page here. You may use following sample code. */
@@ -98,9 +100,20 @@ public class createExam extends HttpServlet {
 ////            }
 //        }
 //
-    request.setAttribute("listOfQuestions", examQuestions);
-    request.getRequestDispatcher("exam.jsp").forward(request,response);
-    
+        request.setAttribute("listOfQuestions", examQuestions);
+
+        request.setAttribute("listOfQuestions", examQuestions);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        String strDate = dateFormat.format(date);
+        try {
+            Date d = dateFormat.parse(strDate);
+            request.setAttribute("examDate", strDate);
+        } catch (ParseException ex) {
+            Logger.getLogger(createExam.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        request.getRequestDispatcher("examPage.jsp").forward(request, response);
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -153,13 +166,13 @@ public class createExam extends HttpServlet {
     private void SetAnswers(Question question) throws SQLException {
         answerDB answerDB = new answerDB();
         ResultSet rs = answerDB.getRightAnswers(question.question_id);
-        while(rs.next()){
+        while (rs.next()) {
             question.correctAnswer = rs.getString("sentence");
             question.answers.add(rs.getString("sentence"));
         }
-        
+
         rs = answerDB.getWrongAnswers(question.question_id);
-        while(rs.next()){
+        while (rs.next()) {
             question.answers.add(rs.getString("sentence"));
         }
     }
